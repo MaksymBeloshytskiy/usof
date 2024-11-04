@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/styles/admin-panel.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav id="navbar">
+        <div id="nav-left">
+            <a href="/" class="nav-logo">MyApp</a>
+        </div>
+        <div id="nav-right">
+            <button id="logoutButton">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Sidebar (бічне меню) -->
+    <div id="sidebar">
+        <button id="usersTab">Manage Users</button>
+        <button id="postsTab">Manage Posts</button>
+        <button id="reportsTab">View Reports</button>
+        <button id="categoriesTab">Manage Categories</button>
+    </div>
+
+    <!-- Основний вміст -->
+    <div id="main-content">
+        <h1>Welcome to Admin Panel</h1>
+        <div id="contentArea">
+            <!-- Вкладки будуть відображатись тут -->
+            <p>Please select an option from the menu.</p>
+        </div>
+    </div>
+
+    <script src="/scripts/admin-panel.js"></script>
+</body>
+</html>

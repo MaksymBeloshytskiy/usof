@@ -1,0 +1,158 @@
+/* Загальні стилі для сторінок Login, Register та Restore Password */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f5;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Контейнер форми */
+.auth-container {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    animation: slideInFromBottom 0.8s ease-out;
+}
+
+/* Заголовок форми */
+.auth-container h2 {
+    margin-bottom: 30px; /* Більший відступ для візуальної зручності */
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Стиль для input полів */
+.auth-container input[type="text"],
+.auth-container input[type="password"],
+.auth-container input[type="email"],
+.auth-container button {
+    width: 100%; /* Однакова ширина для всіх елементів */
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-container input[type="text"],
+.auth-container input[type="password"],
+.auth-container input[type="email"] {
+    border: 1px solid #ccc;
+}
+
+.auth-container input[type="text"]:focus,
+.auth-container input[type="password"]:focus,
+.auth-container input[type="email"]:focus {
+    border-color: #007BFF;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+/* Кнопка для входу або відправлення посилання на відновлення */
+.auth-container button {
+    background-color: #444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s ease;
+}
+
+.auth-container button:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Вимкнена кнопка (disabled) */
+.auth-container button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none; /* Забороняємо будь-яку трансформацію */
+    box-shadow: none; /* Прибираємо тінь */
+    transition: none; /* Вимикаємо анімацію зміни стану */
+}
+
+/* Стиль для повідомлення статусу (span) */
+#email-check-status {
+    display: block;
+    margin-top: 20px; /* Відступ зверху */
+    margin-bottom: 10px; /* Відступ знизу */
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    animation: fadeInStatus 0.5s ease-in-out; /* Анімація появи повідомлення */
+}
+
+/* Додаткові посилання під кнопкою */
+.auth-container .extra-links {
+    margin-top: 25px; /* Більший відступ для кращого візуального відокремлення */
+}
+
+.auth-container .extra-links a {
+    color: #007BFF;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.2s;
+}
+
+.auth-container .extra-links a:hover {
+    color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Повідомлення про помилку */
+.error-message {
+    color: red;
+    margin-top: 20px; /* Більший відступ зверху */
+    text-align: center;
+    opacity: 0;
+    animation: fadeInError 0.5s ease forwards;
+}
+
+/* Анімації */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInStatus {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInError {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Деталі посту</title>
+  <link rel="stylesheet" href="styles/post.css">
+</head>
+<body>
+  <header>
+    <!-- Навігація, логотип тощо -->
+  </header>
+  <main>
+    <article id="post">
+      <h1 id="post-title"></h1>
+      <p id="post-author"></p>
+      <div id="post-content"></div>
+      <div id="post-meta">
+        <button id="post-like-button">👍</button>
+        <span id="post-likes-count">0</span>
+        <button id="post-dislike-button">👎</button>
+        <span id="post-dislikes-count">0</span>
+        <span id="post-comments-count">0 коментарів</span>
+      </div>
+    </article>
+
+    <!-- Список коментарів -->
+    <section id="comments-section">
+      <h2>Коментарі</h2>
+      <div id="comments-list"></div>
+    </section>
+
+    <!-- Форма додавання коментаря -->
+    <section id="add-comment-section">
+      <h2>Додати коментар</h2>
+      <form id="add-comment-form">
+        <textarea id="comment-content" required></textarea>
+        <button type="submit">Надіслати</button>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="/scripts/auth.js"></script>
+  <script type="module" src="/scripts/post.js"></script>
+</body>
+</html>

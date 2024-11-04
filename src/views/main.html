@@ -1,0 +1,68 @@
+<!-- views/main.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Головна сторінка</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/dropdown.css">
+</head>
+<body>
+    <!-- Навігаційна панель -->
+    <nav id="navbar">
+        <div id="nav-left">
+            <a href="/" class="nav-logo">MyApp</a>
+        </div>
+        <div id="nav-right">
+            <!-- Кнопки навігації -->
+            <button id="adminPanel" style="display:none;">Панель адміністратора</button>
+            <button id="createPostButton" style="display:none;">Створити пост</button>
+            <button id="myPostsButton" style="display:none;">Мої пости</button>
+            <button id="loginButton" style="display:none;">Увійти</button>
+            <button id="registerButton" style="display:none;">Реєстрація</button>
+            <!-- Меню акаунту -->
+            <div id="accountWrapper" class="account-menu" style="display: none;">
+                <img id="userAvatar" class="user-avatar" src="/uploads/default/user.png" alt="Аватар користувача">
+                <div id="accountDropdown" class="dropdown-menu">
+                    <div id="accountSettings" class="dropdown-menu-item">
+                        <span class="dropdown-menu-item-icon">⚙️</span> Налаштування акаунту
+                    </div>
+                    <div id="logout" class="dropdown-menu-item">
+                        <span class="dropdown-menu-item-icon">🚪</span> Вийти
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основний вміст сторінки -->
+    <div id="content">
+        <h1>Ласкаво просимо на головну сторінку</h1>
+        <!-- Контейнер для постів -->
+        <div id="postsContainer"></div>
+        <!-- Форма для створення поста -->
+            <div id="createPostForm" style="display: none;">
+                <h2>Створити новий пост</h2>
+                <input type="text" id="postTitle" placeholder="Заголовок поста" required>
+                <textarea id="postContent" placeholder="Опис поста" required></textarea>
+                <!-- Контейнер для карток категорій -->
+                <div id="categoryCardsContainer">
+                    <!-- Картки категорій будуть додані динамічно за допомогою JavaScript -->
+                </div>
+                <div class="form-buttons">
+                    <button id="backToPostsButton">Повернутися назад</button>
+                    <button id="submitPostButton">Створити</button>
+                </div>
+            </div>
+            <!-- Контейнер для відображення постів користувача -->
+            <div id="myPostsContainer" style="display: none;">
+                <!-- Пости користувача будуть відображатися тут -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Підключення головного JavaScript-файлу -->
+    <script type="module" src="/scripts/main.js"></script>
+
+</body>
+</html>
