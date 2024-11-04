@@ -1,0 +1,94 @@
+<!DOCTYPE html><html class="default" lang="en"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>mbeloshyts</title><meta name="description" content="Documentation for mbeloshyts"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div><div class="field"><div id="tsd-toolbar-links"></div></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">mbeloshyts</a></div><div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>mbeloshyts</h1></div><div class="tsd-panel tsd-typography"><a id="md:вітаю-👋" class="tsd-anchor"></a><h1 class="tsd-anchor-link">Вітаю! 👋<a href="#md:вітаю-👋" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1><p>Цей проєкт створений з урахуванням всіх необхідних функціональних вимог для тестування бекенд-функцій. Для зручності, основні маршрути та логіка роботи зібрані в окремих файлах, що спрощує перевірку та розширення проєкту.</p>
+<a id="md:вимоги-для-запуску-проєкту" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Вимоги для запуску проєкту<a href="#md:вимоги-для-запуску-проєкту" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><a id="md:загальні-команди" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Загальні команди<a href="#md:загальні-команди" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
+<li>
+<p><strong>npm install</strong> — для встановлення всіх необхідних залежностей.</p>
+<ul>
+<li>Якщо деякі модулі не інсталюються автоматично, ви зможете знайти інструкції в інтернеті.</li>
+</ul>
+</li>
+<li>
+<p><strong>SOURCE ./usof_db_schema.sql</strong> - для завантаження бази даних</p>
+<ul>
+<li>У проєкті застосовано TypeORM, тому всі сутності створяться автоматично як тільки проєкт завантажиться.</li>
+</ul>
+</li>
+</ul>
+<a id="md:для-linux" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Для Linux<a href="#md:для-linux" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
+<li><strong>sudo apt install redis-server</strong> — установка Redis для збереження даних користувачів при реєстрації.</li>
+<li><strong>sudo systemctl start redis-server</strong> — запуск сервера Redis.</li>
+</ul>
+<a id="md:для-macos" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Для macOS<a href="#md:для-macos" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
+<li><strong>brew install redis</strong></li>
+<li><strong>brew services start redis</strong></li>
+</ul>
+<a id="md:запуск-проєкту" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Запуск проєкту<a href="#md:запуск-проєкту" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ul>
+<li>
+<p>Запустіть програму командою:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">start</span>
+</code><button type="button">Copy</button></pre>
+
+</li>
+<li>
+<p>Для створення адміністратора виконайте команду:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">seed</span>
+</code><button type="button">Copy</button></pre>
+
+</li>
+</ul>
+<blockquote>
+<p>За бажанням, можна створити користувачів самостійно через базу даних.</p>
+</blockquote>
+<a id="md:огляд-api-маршрутів" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Огляд API маршрутів<a href="#md:огляд-api-маршрутів" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Проєкт містить 5 основних маршрутів для роботи з різними ресурсами:</p>
+<a id="md:userroutes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">userRoutes<a href="#md:userroutes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
+<li><strong>POST /register</strong> — реєстрація користувача з валідацією.</li>
+<li><strong>POST /login</strong> — вхід користувача.</li>
+<li><strong>POST /logout</strong> — вихід з профілю.</li>
+<li><strong>GET /verify-email</strong> — підтвердження email.</li>
+<li><strong>POST /password-reset-request</strong> — запит на зміну пароля.</li>
+<li><strong>POST /password-reset</strong> — зміна пароля.</li>
+<li><strong>GET /find-user-by-email</strong> — пошук користувача за email.</li>
+<li><strong>GET /find-user-by-id</strong> — пошук користувача за ID.</li>
+<li><strong>GET /find-user-by-username</strong> — пошук за іменем.</li>
+<li><strong>GET /</strong> — отримання списку всіх користувачів (адміністратори).</li>
+<li><strong>POST /:userId</strong> — оновлення даних користувача (адміністратори або відповідний користувач).</li>
+<li><strong>DELETE /:userId</strong> - видалення користувача (адміністратор або відповідний користувач).</li>
+</ol>
+<a id="md:categoryroutes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">categoryRoutes<a href="#md:categoryroutes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
+<li><strong>POST / (admin)</strong> — створення категорії.</li>
+<li><strong>GET /</strong> — отримання всіх категорій.</li>
+<li><strong>GET /:categoryId</strong> — отримання категорії за ID.</li>
+<li><strong>GET /:categoryTitle</strong> — отримання категорії за назвою.</li>
+<li><strong>PUT /:categoryId (admin)</strong> — оновлення категорії.</li>
+<li><strong>DELETE /:categoryId (admin)</strong> — видалення категорії.</li>
+</ol>
+<a id="md:postroutes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">postRoutes<a href="#md:postroutes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
+<li><strong>GET /paginated</strong> — пагінація постів.</li>
+<li><strong>POST /create</strong> — створення поста.</li>
+<li><strong>GET /my-posts</strong> — отримання постів користувача.</li>
+<li><strong>DELETE /delete/:postId</strong> — видалення поста.</li>
+<li><strong>PUT /update/:postId</strong> — оновлення поста (автор або адмін).</li>
+<li><strong>GET /:postId</strong> — отримання поста за ID.</li>
+<li><strong>GET /</strong> — отримання всіх постів.</li>
+</ol>
+<a id="md:commentroutes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">commentRoutes<a href="#md:commentroutes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
+<li><strong>GET /</strong> — отримання всіх коментарів.</li>
+<li><strong>GET /post/:postId</strong> — коментарі до певного поста.</li>
+<li><strong>GET /:commentId/replies</strong> — відповіді на коментар.</li>
+<li><strong>GET /:commentId</strong> — отримання коментаря за ID.</li>
+<li><strong>POST /</strong> — створення коментаря.</li>
+<li><strong>PUT /:commentId</strong> — оновлення коментаря (автор або адмін).</li>
+<li><strong>DELETE /:commentId</strong> — видалення коментаря.</li>
+</ol>
+<a id="md:likeroutes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">likeRoutes<a href="#md:likeroutes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
+<li><strong>GET /post/:postId/check</strong> — перевірка, чи поставив користувач лайк.</li>
+<li><strong>GET /comment/:commentId/check</strong> — перевірка лайка на коментар.</li>
+<li><strong>POST /post/:postId</strong> — лайк або дизлайк для поста.</li>
+<li><strong>POST /comment/:commentId</strong> — лайк або дизлайк для коментаря.</li>
+<li><strong>GET /post/:postId/count</strong> — кількість лайків для поста.</li>
+<li><strong>GET /comment/:commentId/count</strong> — кількість лайків для коментаря.</li>
+</ol>
+<a id="md:пояснення-щодо-auth" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Пояснення щодо auth<a href="#md:пояснення-щодо-auth" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Як автор, я не бачив доцільності окремо створювати маршрути для аутентифікації, оскільки цю роботу прекрасно виконують Middleware.
+Вони використовуються лише там, де потрібно і при виклику відповідного маршруту. Та й сама аутентифікація це більше про користувача.</p>
+<a id="md:додаткові-фічі-проєкту" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Додаткові фічі проєкту<a href="#md:додаткові-фічі-проєкту" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>В моєму випадку я додав відповіді на коментарі та валідацію вхідних даних на стороні беку через redis. Впринципі на цьому все, решту додам при створенні фронту</p>
+<a id="md:документація" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Документація<a href="#md:документація" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>В секціях нижче, Вас чекає повна документація мого коду</p>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#md:вітаю-👋"><span>Вітаю! 👋</span></a><ul><li><a href="#md:вимоги-для-запуску-проєкту"><span>Вимоги для запуску проєкту</span></a></li><li><ul><li><a href="#md:загальні-команди"><span>Загальні команди</span></a></li><li><a href="#md:для-linux"><span>Для <wbr/>Linux</span></a></li><li><a href="#md:для-macos"><span>Для macOS</span></a></li><li><a href="#md:запуск-проєкту"><span>Запуск проєкту</span></a></li></ul></li><li><a href="#md:огляд-api-маршрутів"><span>Огляд API маршрутів</span></a></li><li><ul><li><a href="#md:userroutes"><span>user<wbr/>Routes</span></a></li><li><a href="#md:categoryroutes"><span>category<wbr/>Routes</span></a></li><li><a href="#md:postroutes"><span>post<wbr/>Routes</span></a></li><li><a href="#md:commentroutes"><span>comment<wbr/>Routes</span></a></li><li><a href="#md:likeroutes"><span>like<wbr/>Routes</span></a></li><li><a href="#md:пояснення-щодо-auth"><span>Пояснення щодо auth</span></a></li></ul></li><li><a href="#md:додаткові-фічі-проєкту"><span>Додаткові фічі проєкту</span></a></li><li><a href="#md:документація"><span>Документація</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="assets/icons.svg#icon-1"></use></svg><span>mbeloshyts</span></a><ul class="tsd-small-nested-navigation" id="tsd-nav-container" data-base="."><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
