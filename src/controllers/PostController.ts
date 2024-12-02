@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { PostAdapter } from "../adapters/PostAdapter";
-import { BaseError } from "../errors/CustomErrors";
-import { CustomRequest } from "../interfaces/CustomRequest";
+import { BadRequestError, BaseError } from "../errors/CustomErrors";
+import { UserAdapter } from "../adapters/UserAdapter";
+import { NotFoundError } from "../errors/CustomErrors";
 
 export class PostController {
   private postAdapter: PostAdapter;
@@ -39,26 +40,34 @@ export class PostController {
     }
   }
 
-  async getUserPosts(req: CustomRequest, res: Response): Promise<void> {
+  async getUserPosts(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.currentUser?.id;
-
+      const userId = req.query.userId as string; // Отримуємо userId із запиту
+  
       if (!userId) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
+        throw new BadRequestError("User ID is required");
       }
-
+  
+      const userAdapter = new UserAdapter();
+      const user = await userAdapter.findUserById(userId);
+      if (!user) {
+        throw new NotFoundError("User not found");
+      }
+  
       const posts = await this.postAdapter.getAllUserPosts(userId);
       res.json(posts);
     } catch (error: any) {
       this.handleError(res, error);
     }
-  }
+  }    
 
   async updatePost(req: Request, res: Response): Promise<void> {
     try {
       const id = req.params.postId;
       const data = req.body;
+
+      console.log(id);
+      console.log(data);
       const post = await this.postAdapter.updatePost(id, data);
       res.json(post);
     } catch (error: any) {
@@ -80,7 +89,12 @@ export class PostController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const result = await this.postAdapter.getPaginatedPosts(page, limit);
+      const searchTerm = req.query.searchTerm as string;
+      const sortOption = req.query.sortOption as string;
+      const sortOrder = (req.query.sortOrder as string)?.toUpperCase() as 'ASC' | 'DESC';
+      const category = req.query.category as string;
+  
+      const result = await this.postAdapter.getPaginatedPosts(page, limit, searchTerm, sortOption, sortOrder, category);
       res.json(result);
     } catch (error: any) {
       this.handleError(res, error);

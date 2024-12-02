@@ -31,16 +31,4 @@ likeRouter.post(
     LikeController.likeOrDislikeComment
 );
 
-// Отримати кількість лайків та дизлайків для поста
-likeRouter.get(
-    "/post/:postId/count",
-    LikeController.getPostLikesDislikesCount
-);
-
-// Отримати кількість лайків та дизлайків для коментаря
-likeRouter.get(
-    "/comment/:commentId/count",
-    LikeController.getCommentLikesDislikesCount
-);
-
 export default likeRouter;

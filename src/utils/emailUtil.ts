@@ -42,21 +42,37 @@ export class EmailUtil {
    */
   static async sendEmailConfirmation(userEmail: string, userId: string): Promise<void> {
     const confirmationToken = TokenUtil.generateToken({ id: userId }, '10m');  // Генеруємо токен на 10 хвилин
-    const confirmationLink = `http://localhost:${process.env.PORT}/api/users/verify-email?token=${confirmationToken}`;
+    const confirmationLink = `http://localhost:5173/verify-email?token=${confirmationToken}`;
 
     const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: userEmail,
-      subject: "Email Confirmation",
-      html: `
-        <h2>Email Confirmation</h2>
-        <p>Please confirm your email by clicking the link below:</p>
-        <a href="${confirmationLink}">Confirm Email</a>
-      `,
+        from: process.env.SMTP_USER,
+        to: userEmail,
+        subject: "Email Confirmation",
+        html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+          <h2 style="color: #4CAF50;">Email Confirmation</h2>
+          <p style="margin-bottom: 20px;">Thank you for registering. Please confirm your email by clicking the button below:</p>
+          <a href="${confirmationLink}" 
+             style="
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #4CAF50;
+                text-decoration: none;
+                border-radius: 5px;
+                text-align: center;
+              ">
+            Confirm Email
+          </a>
+          <p style="margin-top: 20px;">If you did not request this, please ignore this email.</p>
+        </div>
+        `,
     };
 
     await transporter.sendMail(mailOptions);
-  }
+}
+
 
   // Відправка email для відновлення пароля
   /**
@@ -71,20 +87,30 @@ export class EmailUtil {
    * @returns A promise that resolves when the email has been sent.
    */
   static async sendPasswordRecovery(userEmail: string, userId: string): Promise<void> {
-    const recoveryToken = TokenUtil.generateToken({ id: userId }, '5m');  // Генеруємо токен на 5 хвилин
-    const recoveryLink = `http://localhost:${process.env.PORT}/reset-password?token=${recoveryToken}`;
+    const recoveryToken = TokenUtil.generateToken({ id: userId }, '5m'); // Генеруємо токен на 5 хвилин
+    const recoveryLink = `http://localhost:5173/reset-password?token=${recoveryToken}`;
 
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: userEmail,
       subject: "Password Recovery",
       html: `
-        <h2>Password Recovery</h2>
-        <p>Click the link below to reset your password:</p>
-        <a href="${recoveryLink}">Reset Password</a>
+        <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #333;">Password Recovery</h2>
+          <p style="color: #555; font-size: 16px;">
+            Click the button below to reset your password:
+          </p>
+          <a href="${recoveryLink}" style="text-decoration: none; display: inline-block; padding: 12px 24px; color: white; background-color: #007BFF; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 20px;">
+            Reset Password
+          </a>
+          <p style="color: #888; font-size: 14px; margin-top: 20px;">
+            If you didn’t request this email, you can safely ignore it.
+          </p>
+        </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
   }
+
 }

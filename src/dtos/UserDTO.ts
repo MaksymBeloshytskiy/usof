@@ -36,7 +36,6 @@ export interface UpdateUserDTO {
     role?: UserRoles;
     profilePicture?: string;
     isVerified?: boolean;
-    updatedAt: Date;  // Це поле повинне бути автоматично оновлене
 }
 
 /**

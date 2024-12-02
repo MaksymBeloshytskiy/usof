@@ -7,9 +7,8 @@ import { ErrorUtil } from "../utils/errorUtil";
 export class CommentController {
   private static commentAdapter = new CommentAdapter();
 
-  static async createComment(req: CustomRequest, res: Response): Promise<void> {
-    const { content, postId, parentCommentId } = req.body;
-    const authorId = req.currentUser!.id;
+  static async createComment(req: Request, res: Response): Promise<void> {
+    const { content, postId, parentCommentId, authorId } = req.body;
 
     try {
       const newComment = await CommentController.commentAdapter.createComment({

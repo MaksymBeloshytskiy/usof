@@ -147,10 +147,18 @@ export class PostAdapter implements PostAdapterInterface {
    * @returns {Promise<{ posts: ResponsePostDTO[]; total: number }>} A promise that resolves to an object containing the list of posts and the total number of posts.
    * @throws {InternalServerError} If an error occurs while retrieving the posts.
    */
-  async getPaginatedPosts(page: number, limit: number): Promise<{ posts: ResponsePostDTO[]; total: number }> {
+  async getPaginatedPosts(
+    page: number, 
+    limit: number, 
+    searchTerm?: string, 
+    sortOption?: string, 
+    sortOrder?: 'ASC' | 'DESC', 
+    category?: string
+  ): Promise<{ posts: ResponsePostDTO[]; total: number }> {
     try {
-      return await this.postCore.getPaginatedPosts(page, limit);
+      return await this.postCore.getPaginatedPosts(page, limit, searchTerm, sortOption, sortOrder, category);
     } catch (error: any) {
+      console
       throw new InternalServerError(error.message);
     }
   }

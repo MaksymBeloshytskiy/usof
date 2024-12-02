@@ -47,14 +47,8 @@ export class UpdatePostValidator {
   @IsString()
   content?: string;
 
-  @IsString()
-  status?: PostStatus;
-
   @IsArray()
   @ArrayNotEmpty()
   @IsUUID("4", { each: true })
   categoryIds?: string[];
-
-  @IsNotEmpty()
-  updatedAt!: Date;
 }

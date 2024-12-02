@@ -41,6 +41,15 @@ export class Like {
     author!: User;
 
     /**
+     * The ID of the user who authored the like.
+     * 
+     * @column
+     * @type {string}
+     */
+    @Column()
+    authorId!: string;
+
+    /**
      * The post that was liked. Nullable.
      * 
      * @manyToOne
@@ -52,6 +61,16 @@ export class Like {
     post?: Post;
 
     /**
+     * The ID of the post that was liked. Nullable.
+     * 
+     * @column
+     * @type {string}
+     * @optional
+     */
+    @Column({ nullable: true })
+    postId?: string;
+
+    /**
      * The comment that was liked. Nullable.
      * 
      * @manyToOne
@@ -61,6 +80,16 @@ export class Like {
     @ManyToOne(() => Comment, (comment) => comment.likes, { nullable: true, onDelete: "CASCADE" })
     @JoinColumn({ name: "commentId" })
     comment?: Comment;
+
+    /**
+     * The ID of the comment that was liked. Nullable.
+     * 
+     * @column
+     * @type {string}
+     * @optional
+     */
+    @Column({ nullable: true })
+    commentId?: string;
 
     /**
      * The type of the like.

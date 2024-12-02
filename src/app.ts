@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import routes from "./routes";
+import cors from "cors";
 import { errorHandler } from "./middlewares/errorHandler";
 import { AuthMiddleware } from "./middlewares/authMiddleware";
 
@@ -10,9 +11,16 @@ dotenv.config();
 
 // Ініціалізація Express-додатку
 const app = express();
+const origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 // Підключення обробника помилок
 app.use(errorHandler);
+
+app.use(cors({
+    origin: origins, // Дозволяємо запити тільки з клієнтського додатку (Vite на 5173 порту)
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Методи, які дозволені
+    credentials: true // Дозволяємо відправку cookie та інших облікових даних
+}));
 
 // Підключення парсерів тіла запитів
 app.use(express.json());

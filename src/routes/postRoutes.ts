@@ -18,8 +18,7 @@ postRouter.post(
 );
 
 postRouter.get(
-  "/my-posts",
-  AuthMiddleware.isAuthenticated,
+  "/user-posts",
   postController.getUserPosts.bind(postController)
 );
 

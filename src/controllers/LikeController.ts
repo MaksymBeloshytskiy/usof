@@ -1,16 +1,25 @@
 import { Request, Response } from "express";
 import { LikeAdapter } from "../adapters/LikeAdapter";
 import { ErrorUtil } from "../utils/errorUtil";
-import { CustomRequest } from "../interfaces/CustomRequest";
+import { ConnectionPoolClosedEvent } from "typeorm";
 
 export class LikeController {
     private static likeAdapter: LikeAdapter = new LikeAdapter();
 
     // Лайк або дизлайк для поста
-    static async likeOrDislikePost(req: CustomRequest, res: Response): Promise<void> {
+    static async likeOrDislikePost(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
-        const { type } = req.body; // type: 'like' або 'dislike'
-        const authorId = req.currentUser!.id;
+        const { type, authorId } = req.body; // type: 'like' або 'dislike'
+
+        if (!type || (type !== "like" && type !== "dislike")) {
+            res.status(400).json({ message: "Invalid type" });
+            return;
+        }
+
+        if (!authorId || authorId == undefined || !postId) {
+            res.status(400).json({ message: "Author id is required" });
+            return;
+        }
 
         try {
             const existingLike = await LikeController.likeAdapter.findUserLikeForPost(authorId, postId);
@@ -37,10 +46,10 @@ export class LikeController {
     }
 
     // Лайк або дизлайк для коментаря
-    static async likeOrDislikeComment(req: CustomRequest, res: Response): Promise<void> {
+    static async likeOrDislikeComment(req: Request, res: Response): Promise<void> {
         const { commentId } = req.params;
         const { type } = req.body; // type: 'like' або 'dislike'
-        const authorId = req.currentUser!.id;
+        const authorId = req.query.authorId as string;
 
         try {
             const existingLike = await LikeController.likeAdapter.findUserLikeForComment(authorId, commentId);
@@ -66,49 +75,31 @@ export class LikeController {
         }
     }
 
-    static async checkUserPostLike(req: CustomRequest, res: Response): Promise<void> {
+    static async checkUserPostLike(req: Request, res: Response): Promise<void> {
         const { postId } = req.params;
-        const authorId = req.currentUser!.id;
-
+        const authorId = req.query.authorId as string;
+    
         try {
             const existingLike = await LikeController.likeAdapter.findUserLikeForPost(authorId, postId);
-            res.status(200).json({ hasLiked: !!existingLike });
+            const userReaction = existingLike ? existingLike.type : null;
+    
+            res.status(200).json({ userReaction });
+    
         } catch (error) {
             ErrorUtil.handleError(res, error);
         }
     }
+    
 
-    static async checkUserCommentLike(req: CustomRequest, res: Response): Promise<void> {
+    static async checkUserCommentLike(req: Request, res: Response): Promise<void> {
         const { commentId } = req.params;
-        const authorId = req.currentUser!.id;
-
+        const authorId = req.query.authorId as string;
+        
         try {
             const existingLike = await LikeController.likeAdapter.findUserLikeForComment(authorId, commentId);
-            res.status(200).json({ hasLiked: !!existingLike });
-        } catch (error) {
-            ErrorUtil.handleError(res, error);
-        }
-    }
+            const userReaction = existingLike ? existingLike.type : null;
 
-    // Отримати кількість лайків та дизлайків для поста
-    static async getPostLikesDislikesCount(req: Request, res: Response): Promise<void> {
-        const { postId } = req.params;
-
-        try {
-            const likesDislikes = await LikeController.likeAdapter.countLikesDislikesByTarget(postId);
-            res.status(200).json(likesDislikes);
-        } catch (error) {
-            ErrorUtil.handleError(res, error);
-        }
-    }
-
-    // Отримати кількість лайків та дизлайків для коментаря
-    static async getCommentLikesDislikesCount(req: Request, res: Response): Promise<void> {
-        const { commentId } = req.params;
-
-        try {
-            const likesDislikes = await LikeController.likeAdapter.countLikesDislikesByTarget(commentId);
-            res.status(200).json(likesDislikes);
+            res.status(200).json({ userReaction }); 
         } catch (error) {
             ErrorUtil.handleError(res, error);
         }

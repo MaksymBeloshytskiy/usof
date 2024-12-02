@@ -33,7 +33,6 @@ export interface UpdatePostDTO {
   content?: string;
   status?: PostStatus;
   categoryIds?: string[];
-  updatedAt: Date;
 }
 
 /**

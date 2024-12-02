@@ -6,7 +6,7 @@ import { Post } from "../models/Post";
 import { User } from "../models/User";
 import { Category } from "../models/Category";
 import { LikeType } from "../enums/LikeTypes";
-import { Repository, In } from "typeorm";
+import { Repository, In, Brackets, SelectQueryBuilder } from "typeorm";
 
 /**
  * The `PostCore` class implements the `CRUDRepository` interface for managing posts.
@@ -124,7 +124,7 @@ export class PostCore implements CRUDRepository<CreatePostDTO, UpdatePostDTO, Re
             dislikesCount: number;
             commentsCount: number;
         });
-    }
+    }    
 
     /**
      * Finds all posts by a specified key and value.
@@ -195,10 +195,13 @@ export class PostCore implements CRUDRepository<CreatePostDTO, UpdatePostDTO, Re
         const post = await this.postRepository.findOne({ where: { [key]: value } });
         if (!post) throw new Error("Post not found");
 
+        console.log(data);
+
         if (data.title !== undefined) post.title = data.title;
         if (data.content !== undefined) post.content = data.content;
         if (data.status !== undefined) post.status = data.status;
-        if (data.updatedAt !== undefined) post.updatedAt = data.updatedAt;
+
+        console.log(post);
 
         if (data.categoryIds) {
             // Знаходимо категорії за їхніми ID
@@ -212,6 +215,8 @@ export class PostCore implements CRUDRepository<CreatePostDTO, UpdatePostDTO, Re
         }
 
         const updatedPost = await this.postRepository.save(post);
+
+        console.log(updatedPost);
 
         const likesCount = await this.postRepository.count({
             where: { id: updatedPost.id, likes: { type: LikeType.LIKE } },
@@ -275,45 +280,146 @@ export class PostCore implements CRUDRepository<CreatePostDTO, UpdatePostDTO, Re
      * - dislikesCount: The number of dislikes the post has received.
      * - commentsCount: The number of comments on the post.
      */
-    async getPaginatedPosts(page: number, limit: number): Promise<{ posts: ResponsePostDTO[]; total: number }> {
-        const queryBuilder = this.postRepository.createQueryBuilder("post");
-
-        queryBuilder
-            .leftJoinAndSelect("post.author", "author")
-            .leftJoinAndSelect("post.categories", "category")
-            // Додаємо кількість лайків (LIKE)
-            .loadRelationCountAndMap("post.likesCount", "post.likes", "likes", qb => qb.where("likes.type = :likeType", { likeType: LikeType.LIKE }))
-            // Додаємо кількість дизлайків (DISLIKE)
-            .loadRelationCountAndMap("post.dislikesCount", "post.likes", "dislikes", qb => qb.where("dislikes.type = :dislikeType", { dislikeType: LikeType.DISLIKE }))
-            // Додаємо кількість коментарів
-            .loadRelationCountAndMap("post.commentsCount", "post.comments")
-            .select([
-                "post.id",
-                "post.title",
-                "post.content",
-                "post.status",
-                "post.createdAt",
-                "post.updatedAt",
-                "author.fullName",
-                "category.title",
-            ])
-            .where("post.status = :activeStatus", { activeStatus: PostStatus.ACTIVE })
-            .orderBy("post.createdAt", "DESC")
-            .skip((page - 1) * limit)
-            .take(limit);
-
-        const [posts, total] = await queryBuilder.getManyAndCount();
-
+    async getPaginatedPosts(
+        page: number,
+        limit: number,
+        searchTerm?: string,
+        sortOption?: string,
+        sortOrder?: 'ASC' | 'DESC',
+        category?: string
+      ): Promise<{ posts: ResponsePostDTO[]; total: number }> {
+        const offset = (page - 1) * limit;
+      
+        // Будуємо базовий запит
+        const subQuery = this.postRepository.createQueryBuilder('post')
+          .select('post.id', 'id')
+          .addSelect('post.createdAt', 'createdAt')
+          .addSelect(
+            `(SELECT COUNT(*) FROM likes WHERE likes.postId = post.id AND likes.type = :likeType)`,
+            'likesCount'
+          )
+          .addSelect(
+            `(SELECT COUNT(*) FROM likes WHERE likes.postId = post.id AND likes.type = :dislikeType)`,
+            'dislikesCount'
+          )
+          .addSelect(
+            `(SELECT COUNT(*) FROM comments WHERE comments.postId = post.id)`,
+            'commentsCount'
+          )
+          .leftJoin('post.author', 'author')
+          .where('post.status = :activeStatus', { activeStatus: PostStatus.ACTIVE })
+          .setParameter('likeType', LikeType.LIKE)
+          .setParameter('dislikeType', LikeType.DISLIKE);
+      
+        // Фільтрація за пошуковим запитом
+        if (searchTerm) {
+          subQuery.andWhere(
+            new Brackets((qb) => {
+              qb.where('LOWER(post.title) LIKE :searchTerm', { searchTerm: `%${searchTerm.toLowerCase()}%` })
+                .orWhere('LOWER(author.fullName) LIKE :searchTerm', { searchTerm: `%${searchTerm.toLowerCase()}%` });
+            })
+          );
+        }
+      
+        // Фільтрація за категорією
+        if (category) {
+          subQuery.innerJoin('post.categories', 'categoryFilter', 'categoryFilter.title = :category', { category });
+        }
+      
+        // Сортування
+        if (sortOption) {
+          let sortColumn;
+      
+          switch (sortOption) {
+            case 'likes':
+              sortColumn = 'likesCount';
+              break;
+            case 'dislikes':
+              sortColumn = 'dislikesCount';
+              break;
+            case 'comments':
+                sortColumn = 'commentsCount';
+                break;
+            case 'date':
+              sortColumn = 'createdAt';
+              break;
+            default:
+              sortColumn = 'post.id';
+              break;
+          }
+      
+          subQuery.orderBy(sortColumn, sortOrder || 'DESC');
+        } else {
+          subQuery.orderBy('createdAt', sortOrder || 'DESC');
+        }
+      
+        // Пагінація
+        subQuery.offset(offset).limit(limit);
+      
+        // Виконуємо підзапит для отримання IDs постів та їхніх підрахунків
+        const subQueryResult = await subQuery.getRawMany();
+      
+        const postIds = subQueryResult.map(row => row.id);
+      
+        // Загальна кількість постів з урахуванням фільтрів
+        const total = await subQuery.getCount();
+      
+        if (postIds.length === 0) {
+          return { posts: [], total };
+        }
+      
+        // Отримуємо пости з необхідними полями
+        const posts = await this.postRepository.createQueryBuilder('post')
+          .leftJoinAndSelect('post.author', 'author')
+          .leftJoinAndSelect('post.categories', 'category')
+          .whereInIds(postIds)
+          .getMany();
+      
+        // Створюємо мапу постів за їх IDs
+        const postsMap = new Map(posts.map(post => [post.id, post]));
+      
+        // Отримуємо підрахунки лайків, дизлайків та коментарів для кожного поста з `subQueryResult`
+        const countsMap = new Map<string, { likesCount: number; dislikesCount: number; commentsCount: number; createdAt: Date }>();
+        subQueryResult.forEach(row => {
+          countsMap.set(row.id, {
+            likesCount: Number(row.likesCount),
+            dislikesCount: Number(row.dislikesCount),
+            commentsCount: Number(row.commentsCount),
+            createdAt: row.createdAt,
+          });
+        });
+      
+        // Формуємо результуючий масив постів, впорядкований відповідно до `postIds`
+        const responsePosts = postIds.map(id => {
+          const post = postsMap.get(id);
+          if (!post) return null;
+      
+          const authorFullName = post.author ? post.author.fullName : 'Unknown';
+          const categoryTitles = post.categories ? post.categories.map((category) => category.title) : [];
+      
+          const postCounts = countsMap.get(post.id) || { likesCount: 0, dislikesCount: 0, commentsCount: 0, createdAt: post.createdAt };
+      
+          return {
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            status: post.status as PostStatus,
+            author: authorFullName,
+            categoryTitles: categoryTitles,
+            likesCount: postCounts.likesCount,
+            dislikesCount: postCounts.dislikesCount,
+            commentsCount: postCounts.commentsCount,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+          } as ResponsePostDTO;
+        }).filter(post => post !== null);
+      
         return {
-            posts: posts.map((post) => this.toResponsePostDTO(post as Post & {
-                likesCount: number;
-                dislikesCount: number;
-                commentsCount: number;
-            })),
-            total,
+          posts: responsePosts,
+          total,
         };
-    }
-
+    }      
+    
     /**
      * Retrieves the count of comments for a specific post.
      *
@@ -343,38 +449,76 @@ export class PostCore implements CRUDRepository<CreatePostDTO, UpdatePostDTO, Re
      * @returns A promise that resolves to an array of ResponsePostDTO objects representing the user's posts.
      */
     async getAllPostsByUser(userId: string): Promise<ResponsePostDTO[]> {
-        const queryBuilder = this.postRepository.createQueryBuilder("post");
-
-        queryBuilder
-            .leftJoinAndSelect("post.author", "author")
-            .leftJoinAndSelect("post.categories", "category")
-            // Додаємо кількість лайків (LIKE)
-            .loadRelationCountAndMap("post.likesCount", "post.likes", "likes", qb => qb.where("likes.type = :likeType", { likeType: LikeType.LIKE }))
-            // Додаємо кількість дизлайків (DISLIKE)
-            .loadRelationCountAndMap("post.dislikesCount", "post.likes", "dislikes", qb => qb.where("dislikes.type = :dislikeType", { dislikeType: LikeType.DISLIKE }))
-            // Додаємо кількість коментарів
-            .loadRelationCountAndMap("post.commentsCount", "post.comments")
-            .select([
-                "post.id",
-                "post.title",
-                "post.content",
-                "post.status",
-                "post.createdAt",
-                "post.updatedAt",
-                "author.fullName",
-                "category.title",
-            ])
-            .where("author.id = :userId", { userId })
-            .orderBy("post.createdAt", "DESC");
-
-        const posts = await queryBuilder.getMany();
-
-        return posts.map((post) => this.toResponsePostDTO(post as Post & {
-            likesCount: number;
-            dislikesCount: number;
-            commentsCount: number;
-        }));
+        const subQuery = this.postRepository.createQueryBuilder('post')
+          .select('post.id', 'id')
+          .addSelect('post.createdAt', 'createdAt')
+          .addSelect(
+            `(SELECT COUNT(*) FROM likes WHERE likes.postId = post.id AND likes.type = :likeType)`,
+            'likesCount'
+          )
+          .addSelect(
+            `(SELECT COUNT(*) FROM likes WHERE likes.postId = post.id AND likes.type = :dislikeType)`,
+            'dislikesCount'
+          )
+          .addSelect(
+            `(SELECT COUNT(*) FROM comments WHERE comments.postId = post.id)`,
+            'commentsCount'
+          )
+          .where('post.authorId = :userId', { userId })
+          .andWhere('post.status = :status', { status: PostStatus.ACTIVE })
+          .setParameter('likeType', LikeType.LIKE)
+          .setParameter('dislikeType', LikeType.DISLIKE);
+      
+        const subQueryResult = await subQuery.getRawMany();
+      
+        const postIds = subQueryResult.map(row => row.id);
+      
+        if (postIds.length === 0) {
+          return [];
+        }
+      
+        const posts = await this.postRepository.createQueryBuilder('post')
+          .leftJoinAndSelect('post.author', 'author')
+          .leftJoinAndSelect('post.categories', 'category')
+          .whereInIds(postIds)
+          .getMany();
+      
+        const postsMap = new Map(posts.map(post => [post.id, post]));
+      
+        const countsMap = new Map<string, { likesCount: number; dislikesCount: number; commentsCount: number }>();
+        subQueryResult.forEach(row => {
+          countsMap.set(row.id, {
+            likesCount: Number(row.likesCount),
+            dislikesCount: Number(row.dislikesCount),
+            commentsCount: Number(row.commentsCount),
+          });
+        });
+      
+        return postIds.map(id => {
+          const post = postsMap.get(id);
+          if (!post) return null;
+      
+          const authorFullName = post.author ? post.author.fullName : 'Unknown';
+          const categoryTitles = post.categories ? post.categories.map(category => category.title) : [];
+          const postCounts = countsMap.get(id) || { likesCount: 0, dislikesCount: 0, commentsCount: 0 };
+      
+          return {
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            status: post.status as PostStatus,
+            author: authorFullName,
+            categoryTitles: categoryTitles,
+            likesCount: postCounts.likesCount,
+            dislikesCount: postCounts.dislikesCount,
+            commentsCount: postCounts.commentsCount,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+          } as ResponsePostDTO;
+        }).filter(post => post !== null);
     }
+      
+  
     
     /**
      * Converts a Post object along with its associated counts into a ResponsePostDTO.

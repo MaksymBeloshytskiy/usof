@@ -15,7 +15,6 @@ categoryRouter.post(
 // Отримання всіх категорій (доступно всім)
 categoryRouter.get(
     "/",
-    AuthMiddleware.isAuthenticated, // Перевірка автентифікації
     CategoryController.getAllCategories
 );
 

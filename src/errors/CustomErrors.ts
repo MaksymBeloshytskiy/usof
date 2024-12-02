@@ -11,6 +11,12 @@ export class BaseError extends Error {
       Object.setPrototypeOf(this, new.target.prototype);
     }
   }
+
+  export class BadRequestError extends BaseError {
+    constructor(message: string, errors?: any) {
+      super(message, 400, errors);
+    }
+  }
   
   export class ValidationError extends BaseError {
     constructor(message: string, errors?: any) {

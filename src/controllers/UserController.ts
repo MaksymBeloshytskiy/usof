@@ -7,6 +7,8 @@ import { TokenUtil, Payload } from "../utils/tokenUtil";
 import { EmailUtil } from "../utils/emailUtil";
 import { ErrorUtil } from "../utils/errorUtil";
 import redisClient from "../config/redis";
+import fs from "fs";
+import path from "path";
 
 export class UserController {
     private static userAdapter: UserAdapter = new UserAdapter();
@@ -90,9 +92,6 @@ export class UserController {
         try {
             let { username, password } = req.body;
 
-            // Приводимо username до нижнього регістру для консистентності
-            username = username.toLowerCase();
-
             // Пошук користувача за username
             const user = await UserController.userAdapter.findUserByUsername(username);
 
@@ -115,7 +114,17 @@ export class UserController {
             const payload: Payload = { id: user.id, role: user.role };
             const token = TokenUtil.generateToken(payload, "1d");
 
-            res.status(200).json({ message: "Login successful", token });
+            const userObj = {
+                                id: user.id,
+                                token: token,
+                                email: user.email,
+                                fullName: user.fullName,
+                                pic: user.profilePicture,
+                                role: user.role,
+                                status: user.isVerified
+                            };
+
+            res.status(200).json({ message: "Login successful", user: userObj});
         } catch (error) {
             ErrorUtil.handleError(res, error);
         }
@@ -147,6 +156,33 @@ export class UserController {
             ErrorUtil.handleError(res, error);
         }
     }
+
+    // Відправка підтвердження email
+    /**
+     * Sends an email confirmation link to the user's email address.
+     * 
+     * @param req - The request object containing the user's email in the body.
+     * @param res - The response object used to send the response back to the client.
+     * @returns A promise that resolves to void.
+     * 
+     * @throws Will handle and respond with appropriate error messages if the user is not found.
+     */
+    static async emailVerification(req: Request, res: Response): Promise<void> {
+        try {
+            const { email } = req.body;
+            const user = await UserController.userAdapter.findUserByEmail(email);
+
+            if (!user) {
+                return ErrorUtil.handleNotFoundError(res, "User");
+            }
+
+            await EmailUtil.sendEmailConfirmation(email, user.id);
+            res.status(200).json({ message: "Email confirmation sent" });
+        } catch (error) {
+            ErrorUtil.handleError(res, error);
+        }
+    }
+
 
     // Верифікація email користувача
     /**
@@ -193,7 +229,6 @@ export class UserController {
             // Оновлюємо статус верифікації користувача
             const updatedUser = await UserController.userAdapter.updateUser(user.id, {
                 isVerified: true,
-                updatedAt: new Date()
             });
 
             res.status(200).json({ message: "Email successfully verified", user: updatedUser });
@@ -261,7 +296,6 @@ export class UserController {
             const hashedPassword = await HashUtil.hashPassword(password);
             const updatedUser = await UserController.userAdapter.updateUser(user.id, {
                 passwordHash: hashedPassword,
-                updatedAt: new Date()
             });
 
             res.status(200).json(updatedUser);
@@ -282,14 +316,20 @@ export class UserController {
      */
     static async getUserById(req: Request, res: Response): Promise<void> {
         try {
-            const { userId } = req.params;
+            const userId = req.query.userId as string;
+            if (!userId) {
+                return ErrorUtil.handleValidationError(res, "User ID is required");
+            }
+            
             const user = await UserController.userAdapter.findUserById(userId);
 
-            if (!user) {
+            if (!user || user === null || user === undefined) {
                 return ErrorUtil.handleNotFoundError(res, "User");
             }
 
-            res.status(200).json(user);
+            const userObj = {fullName: user.fullName, pic: user.profilePicture, rating: user.rating, role: user.role};
+            console.log(userObj);
+            res.status(200).json(userObj);
         } catch (error) {
             ErrorUtil.handleError(res, error);
         }
@@ -331,7 +371,8 @@ export class UserController {
      */
     static async getUserByFullName(req: Request, res: Response): Promise<void> {
         try {
-            const { fullName } = req.params;
+            const fullName = req.query.fullName as string;
+            
             const user = await UserController.userAdapter.findUserByFullName(fullName);
 
             if (!user) {
@@ -388,6 +429,32 @@ export class UserController {
         }
     }
 
+    static async getUserAvatar(req: Request, res: Response): Promise<void> {
+        try {
+            const { userId } = req.params;
+            const user = await UserController.userAdapter.findUserById(userId);
+
+            if (!user || !user.profilePicture) {
+                return ErrorUtil.handleNotFoundError(res, "User avatar");
+            }
+
+            // Шлях до файлу аватарки
+            const avatarPath = path.join(__dirname, "..", "..", "src", user.profilePicture);
+
+            // Перевірка існування файлу
+            fs.access(avatarPath, fs.constants.F_OK, (err) => {
+                if (err) {
+                    return ErrorUtil.handleNotFoundError(res, "User avatar file");
+                }
+
+                // Відправляємо файл на фронт
+                res.sendFile(avatarPath);
+            });
+        } catch (error) {
+            ErrorUtil.handleError(res, error);
+        }
+    }
+
     // Оновити користувача
     /**
      * Updates a user with the given userId using the data provided in the request body.
@@ -398,47 +465,102 @@ export class UserController {
      * 
      * @throws Will handle any errors that occur during the update process using ErrorUtil.
      */
-    static async updateUser(req: Request, res: Response): Promise<void> {
+    static async updateUserProfile(req: Request, res: Response): Promise<void> {
         try {
-            const { userId } = req.params;
-
-            // Перевірка наявності користувача
-            const user = await UserController.userAdapter.findUserById(userId);
-            if (!user) {
-                return ErrorUtil.handleNotFoundError(res, "User");
+          const { userId } = req.params;
+          const { fullName, email, role } = req.body;
+      
+          // Перевірка наявності користувача
+          const user = await UserController.userAdapter.findUserById(userId);
+          if (!user) {
+            return ErrorUtil.handleNotFoundError(res, "User");
+          }
+      
+          // Перевірка унікальності email
+          if (email && email !== user.email) {
+            const existingUser = await UserController.userAdapter.findUserByEmail(email);
+            if (existingUser) {
+              return ErrorUtil.handleValidationError(res, "Email already in use");
             }
+          }
+      
+          // Оновлення аватара
+          let profilePicture;
+          if (req.file) {
+            profilePicture = `/uploads/avatars/${req.file.filename}`;
+      
+            // Логіка видалення старого аватара
+            if (user.profilePicture) {
+              // Шлях до старого аватара
+              const oldAvatarPath = path.join(__dirname, '..', '..', 'src', user.profilePicture);
+      
+              // Перевірка існування файлу та видалення
+              fs.access(oldAvatarPath, fs.constants.F_OK, (err) => {
+                if (!err) {
+                  fs.unlink(oldAvatarPath, (err) => {
+                    if (err) {
+                      console.error(`\nПомилка при видаленні старого аватара: ${err}`);
+                    } else {
+                      console.log(`\nСтарий аватар видалено: ${oldAvatarPath}`);
+                    }
+                  });
+                } else {
+                  console.error(`Старий аватар не знайдено: ${oldAvatarPath}`);
+                }
+              });
+            }
+          }
+      
+          const updatedUser = await UserController.userAdapter.updateUser(userId, {
+            fullName,
+            email,
+            profilePicture,
+            role,
+          });
 
-            const updatedUser = await UserController.userAdapter.updateUser(userId, req.body);
-            res.status(200).json(updatedUser);
+          res.status(200).json({
+            message: "Профіль успішно оновлено",
+            user: {
+                id: updatedUser.id,
+                fullName: updatedUser.fullName,
+                email: updatedUser.email,
+                pic: updatedUser.profilePicture,
+            },
+          });
         } catch (error) {
-            ErrorUtil.handleError(res, error);
+          ErrorUtil.handleError(res, error);
         }
     }
 
-    // static async updateUserProfilePicture(req: Request & { file?: Express.Multer.File }, res: Response): Promise<void> {
-    //     try {
-    //         const { userId } = req.body;
-    //         const user = await UserController.userAdapter.findUserById(userId);
-
-    //         if (!user) {
-    //             return ErrorUtil.handleNotFoundError(res, "User");
-    //         }
-
-    //         if (req.file) {
-    //             const profilePicture = req.file.filename;
-    //             const updatedUser = await UserController.userAdapter.updateUser(userId, {
-    //                 profilePicture,
-    //                 updatedAt: new Date()
-    //             });
-    //             res.status(200).json(updatedUser);
-    //         } else {
-    //             return ErrorUtil.handleValidationError(res, "No file uploaded");
-    //         }
-    //     } catch (error) {
-    //         ErrorUtil.handleError(res, error);
-    //     }
-    // }
-
+    static async changePassword(req: Request, res: Response): Promise<void> {
+        try {
+          const { userId } = req.params;
+          const { newPassword } = req.body;
+      
+          // Перевірка наявності користувача
+          const user = await UserController.userAdapter.findUserById(userId);
+          if (!user) {
+            return ErrorUtil.handleNotFoundError(res, "User");
+          }
+      
+          // Перевірка поточного пароля
+          if (!user.passwordHash) {
+            return ErrorUtil.handleUnauthorizedError(res, "Password not found for user");
+          }
+      
+          // Хешування нового пароля
+          const hashedPassword = await HashUtil.hashPassword(newPassword);
+      
+          const updatedUser = await UserController.userAdapter.updateUser(userId, {
+            passwordHash: hashedPassword,
+          });
+      
+          res.status(200).json({ message: "Password changed successfully" });
+        } catch (error) {
+          ErrorUtil.handleError(res, error);
+        }
+    }
+      
     // Видалити користувача
     /**
      * Deletes a user by their userId.

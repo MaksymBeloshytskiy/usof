@@ -27,34 +27,47 @@ export class LikeCore implements CRUDRepository<CreateLikeDTO, UpdateLikeDTO, Re
      * @throws Will throw an error if the author, post, or comment is not found.
      */
     async create(data: CreateLikeDTO): Promise<ResponseLikeDTO> {
+        // Перевірка автора
         const author = await this.userRepository.findOne({ where: { id: data.authorId } });
         if (!author) throw new Error("Author not found");
-
+    
         let post: Post | undefined = undefined;
         let comment: Comment | undefined = undefined;
-
+    
+        // Перевірка поста
         if (data.postId) {
             const foundPost = await this.postRepository.findOne({ where: { id: data.postId } });
             if (!foundPost) throw new Error("Post not found");
             post = foundPost;
+    
+            // Перевірка чи вже існує лайк для поста
+            const existingLike = await this.findUserLikeForTarget(data.authorId, data.postId);
+            if (existingLike) throw new Error("User already reacted to this post");
         }
-
+    
+        // Перевірка коментаря
         if (data.commentId) {
             const foundComment = await this.commentRepository.findOne({ where: { id: data.commentId } });
-            comment = foundComment ? foundComment : undefined;
-            if (!comment) throw new Error("Comment not found");
+            if (!foundComment) throw new Error("Comment not found");
+            comment = foundComment;
+    
+            // Перевірка чи вже існує лайк для коментаря
+            const existingLike = await this.findUserLikeForTarget(data.authorId, undefined, data.commentId);
+            if (existingLike) throw new Error("User already reacted to this comment");
         }
-
+    
+        // Створення нового лайку
         const like = this.likeRepository.create({
             ...data,
             author,
             post,
             comment,
         });
-
+    
         const savedLike = await this.likeRepository.save(like);
         return this.toResponseLikeDTO(savedLike);
     }
+    
 
     // Знаходження одного лайку за параметром
     /**
@@ -162,23 +175,34 @@ export class LikeCore implements CRUDRepository<CreateLikeDTO, UpdateLikeDTO, Re
      * @param commentId - (Optional) The ID of the comment that was liked.
      * @returns A promise that resolves to a ResponseLikeDTO if a like is found, or null if no like is found.
      */
-    async findUserLikeForTarget(authorId: string, postId?: string, commentId?: string): Promise<ResponseLikeDTO | null> {
+    async findUserLikeForTarget(
+        authorId: string,
+        postId?: string,
+        commentId?: string
+    ): Promise<ResponseLikeDTO | null> {
         let like: Like | undefined;
-
+    
         if (postId) {
-            like = (await this.likeRepository.findOne({
-                where: { author: { id: authorId }, post: { id: postId } },
+            like = await this.likeRepository.findOne({
+                where: {
+                    authorId: authorId,
+                    postId: postId,
+                },
                 relations: ["author", "post"],
-            })) || undefined;
+            }) as Like;
         } else if (commentId) {
-            like = (await this.likeRepository.findOne({
-                where: { author: { id: authorId }, comment: { id: commentId } },
+            like = await this.likeRepository.findOne({
+                where: {
+                    authorId: authorId,
+                    commentId: commentId,
+                },
                 relations: ["author", "comment"],
-            })) || undefined;
+            }) || undefined;
         }
-
+    
         return like ? this.toResponseLikeDTO(like) : null;
     }
+        
 
     // Конвертація Entity Like до DTO Like
     /**
@@ -190,9 +214,9 @@ export class LikeCore implements CRUDRepository<CreateLikeDTO, UpdateLikeDTO, Re
     private toResponseLikeDTO(like: Like): ResponseLikeDTO {
         return {
             id: like.id,
-            authorId: like.author.id,
-            postId: like.post ? like.post.id : undefined,
-            commentId: like.comment ? like.comment.id : undefined,
+            authorId: like.authorId,
+            postId: like.post ? like.postId : undefined,
+            commentId: like.comment ? like.commentId : undefined,
             type: like.type as LikeType,
             createdAt: like.createdAt,
             updatedAt: like.updatedAt,
